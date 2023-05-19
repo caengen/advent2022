@@ -14,26 +14,23 @@ impl Elf {
 fn parser(input: &str) -> IResult<&str, u32> {
     map_res(digit1, str::parse)(input)
 }
-// fn elf(input: &str) -> IResult<> {
-//   take_while(cond)
 
+// answer 67658
 pub fn day1(file_path: &str) {
     let contents = std::fs::read_to_string(file_path).unwrap();
-    let mut elfs: Vec<Elf> = Vec::new();
-    elfs.push(Elf(vec![]));
-    for line in contents.lines() {
+    let (total, _) = contents.lines().fold((0, 0), |mut acc, line| {
         let res = parser(line);
-        if let Ok(("", amnt)) = res {
-            elfs.last_mut().unwrap().0.push(amnt);
+        if let Ok((_, amnt)) = res {
+            acc.1 += amnt;
         } else {
-            elfs.push(Elf(vec![]));
+            if acc.1 > acc.0 {
+                acc.0 = acc.1;
+            }
+            acc.1 = 0;
         }
-    }
 
-    let res = elfs
-        .iter()
-        .reduce(|a, b| if a.total() > b.total() { a } else { b });
+        acc
+    });
 
-    let total = res.unwrap().total();
     println!("{:?}", total);
 }
