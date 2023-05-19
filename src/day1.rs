@@ -34,3 +34,22 @@ pub fn day1(file_path: &str) {
 
     println!("{:?}", total);
 }
+
+pub fn day1_part2(file_path: &str) {
+    let contents = std::fs::read_to_string(file_path).unwrap();
+    let (mut total, _) = contents.lines().fold((Vec::new(), 0), |mut acc, line| {
+        let res = parser(line);
+        if let Ok((_, amnt)) = res {
+            acc.1 += amnt;
+        } else {
+            acc.0.push(acc.1);
+            acc.1 = 0;
+        }
+
+        acc
+    });
+    total.sort();
+    let sum_of_top_3: u32 = total.iter().rev().take(3).sum();
+
+    println!("{:?}", sum_of_top_3);
+}

@@ -18,7 +18,7 @@ fn main() {
 
     if let Ok(("", n)) = res {
         let solve_fn = match n {
-            1 => day1,
+            1 => day1_part2,
             _ => dummy,
         };
         let start = Instant::now();
