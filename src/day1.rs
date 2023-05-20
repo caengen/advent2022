@@ -15,7 +15,6 @@ fn parser(input: &str) -> IResult<&str, u32> {
     map_res(digit1, str::parse)(input)
 }
 
-// answer 67658
 pub fn day1(file_path: &str) {
     let contents = std::fs::read_to_string(file_path).unwrap();
     let (total, _) = contents.lines().fold((0, 0), |mut acc, line| {
