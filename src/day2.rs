@@ -1,51 +1,9 @@
-use nom::character::complete::space1;
+use nom::character::complete::{anychar, space1};
 use nom::sequence::separated_pair;
 use nom::{bytes::streaming::tag, combinator::value, IResult};
 
-#[derive(Clone)]
-enum RPS {
-    Rock,
-    Paper,
-    Scissors,
-}
-
-#[derive(Clone)]
-enum Strategy {
-    Win,
-    Lose,
-    Draw,
-}
-
-fn rps(input: &str) -> IResult<&str, RPS> {
-    nom::branch::alt((
-        value(RPS::Rock, tag("A")),
-        value(RPS::Paper, tag("B")),
-        value(RPS::Scissors, tag("C")),
-    ))(input)
-}
-
-fn strat(input: &str) -> IResult<&str, Strategy> {
-    nom::branch::alt((
-        value(Strategy::Lose, tag("X")),
-        value(Strategy::Draw, tag("Y")),
-        value(Strategy::Win, tag("Z")),
-    ))(input)
-}
-
-fn map_strat_to_rps(other: &RPS, strat: &Strategy) -> RPS {
-    match strat {
-        Strategy::Win => match other {
-            RPS::Rock => RPS::Paper,
-            RPS::Paper => RPS::Scissors,
-            RPS::Scissors => RPS::Rock,
-        },
-        Strategy::Lose => match other {
-            RPS::Rock => RPS::Scissors,
-            RPS::Paper => RPS::Rock,
-            RPS::Scissors => RPS::Paper,
-        },
-        Strategy::Draw => other.clone(),
-    }
+fn parse_char(input: &str) -> IResult<&str, char> {
+    anychar(input)
 }
 
 // answer: 16098
@@ -53,23 +11,39 @@ pub fn day2(file_path: &str) {
     let contents = std::fs::read_to_string(file_path).unwrap();
 
     let score = contents.lines().fold(0, |acc, line| {
-        let (_, (elf, strat)) = separated_pair(rps, space1, strat)(line).unwrap();
-        let me = map_strat_to_rps(&elf, &strat);
+        let (_, (a, b)) = separated_pair(parse_char, space1, parse_char)(line).unwrap();
+        let a = a as u8;
+        let b = b;
 
-        let type_points = match me {
-            RPS::Rock => 1,
-            RPS::Paper => 2,
-            RPS::Scissors => 3,
+        let b = match b {
+            'X' => match a {
+                // Should lose
+                0x41 => 0x43,
+                0x42 => 0x41,
+                _ => 0x42,
+            },
+            'Y' => match a {
+                // should draw
+                _ => a,
+            },
+            _ => ((a - 0x41 + 0x1) % 0x3) + 0x41, // should win, wrap around a
         };
 
-        let match_points = match (elf, me) {
-            (RPS::Rock, RPS::Scissors) | (RPS::Paper, RPS::Rock) | (RPS::Scissors, RPS::Paper) => 0,
-            (RPS::Scissors, RPS::Rock) | (RPS::Rock, RPS::Paper) | (RPS::Paper, RPS::Scissors) => 6,
-            _ => 3,
+        let mp: u8 = match a >= b {
+            true => match a - b {
+                1 => 0,
+                2 => 6,
+                _ => 3,
+            },
+            false => match b - a {
+                1 => 6,
+                2 => 0,
+                _ => 3,
+            },
         };
 
-        acc + type_points + match_points
+        acc + ((b - 0x40) + mp) as u32
     });
 
-    println!("{:?}", score);
+    println!("Solution: {:?}", score);
 }
