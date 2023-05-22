@@ -2,8 +2,10 @@ use nom::{character::complete::digit1, combinator::map_res, number::complete::i3
 use std::{env, time::Instant};
 mod day1;
 mod day2;
+mod day3;
 use day1::*;
 use day2::*;
+use day3::*;
 
 fn parse_int(input: &str) -> IResult<&str, u32> {
     map_res(digit1, str::parse)(input)
@@ -22,6 +24,7 @@ fn main() {
         let solve_fn = match n {
             1 => day1_part2,
             2 => day2,
+            3 => day3,
             _ => dummy,
         };
         let start = Instant::now();
